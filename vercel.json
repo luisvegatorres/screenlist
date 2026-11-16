@@ -1,8 +1,13 @@
 {
-  "buildCommand": "npm test && npm run build",
+  "installCommand": "npm install && npm ci --prefix mobile",
+  "buildCommand": "npm test && npm run test:mobile && npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/mobile/:path*",
+      "destination": "/mobile/index.html"
+    },
     {
       "source": "/api/:path*",
       "destination": "/api"

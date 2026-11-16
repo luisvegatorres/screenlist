@@ -2,9 +2,16 @@
 
 A movie watchlist built with MongoDB, Express, React, and Node.js. The watchlist and About page use a custom responsive layout.
 
+## Mobile client (Module 3)
+The `mobile/` directory contains the React Native application. See `mobile/README.md` for native setup, architecture, and verification steps. The `production` branch contains the runnable submission; `main` contains the same delivered source for the GitHub ZIP.
+
+Live website: https://screenlist-three.vercel.app/
+
+React Native web preview: https://screenlist-three.vercel.app/mobile/
+
 ## Run locally
 Use Node.js 22 or newer. Install dependencies with `npm install`, copy `.env.example` to `.env`, and configure `MONGODB_URI` for your MongoDB database.
-Run `npm test`, `npm run build`, and `npm start`. Open http://localhost:3000.
+Run `npm ci --prefix mobile`, `npm test`, `npm run test:mobile`, `npm run build`, and `npm start`. Open http://localhost:3000.
 
 ## API
 - GET /api/movies?page=1 — paginated collection (12 records per page)
@@ -26,3 +33,4 @@ The API tests exercise CRUD, input validation, pagination, missing routes, and s
 
 ## Source archive
 Download the ZIP from the repository's default branch. Dependencies, generated build files, and environment secrets are ignored.
+

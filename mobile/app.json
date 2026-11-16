@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Screenlist",
+    "slug": "screenlist-mobile",
+    "scheme": "screenlist",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.luisvegatorres.screenlist"
+    },
+    "android": { "package": "com.luisvegatorres.screenlist" },
+    "web": { "bundler": "metro", "output": "single" }
+  }
+}

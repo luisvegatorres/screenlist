@@ -9,8 +9,9 @@
   "scripts": {
     "build": "node scripts/build.js",
     "start": "node --env-file-if-exists=.env server/start.js",
-    "test": "node --test",
-    "check": "node --check server/app.js && node --check server/database.js"
+    "test": "node --test test/*.test.js",
+    "check": "node --check server/app.js && node --check server/database.js",
+    "test:mobile": "npm --prefix mobile test"
   },
   "dependencies": {
     "express": "5.1.0",

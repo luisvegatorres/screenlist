@@ -6,3 +6,8 @@ dist/
 .vercel/
 .DS_Store
 coverage/
+.expo/
+*.tsbuildinfo
+mobile/ios/
+mobile/android/
+
