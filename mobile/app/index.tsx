@@ -105,7 +105,7 @@ export default function Watchlist() {
             />
             <View style={[s.row, { marginTop: 20 }]}>
               <Text style={s.heading}>Your watchlist</Text>
-              <Text style={s.body}>{data ? data.total + " films" : "—"}</Text>
+              <Text style={s.body}>{data ? data.total + (data.total === 1 ? " film" : " films") : "—"}</Text>
             </View>
             {error ? <ErrorPanel message={error} retry={refresh} /> : null}
           </View>

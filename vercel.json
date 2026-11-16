@@ -6,7 +6,7 @@
   "rewrites": [
     {
       "source": "/mobile/:path*",
-      "destination": "/mobile/index.html"
+      "destination": "/mobile"
     },
     {
       "source": "/api/:path*",

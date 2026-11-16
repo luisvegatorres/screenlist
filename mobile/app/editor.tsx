@@ -64,7 +64,7 @@ export default function Editor() {
     setError("");
     try {
       const movie = await api.save(values, id);
-      router.replace({ pathname: "/movie/[id]", params: { id: movie._id } });
+      router.dismissTo({ pathname: "/movie/[id]", params: { id: movie._id } });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save your movie.");
     } finally {
