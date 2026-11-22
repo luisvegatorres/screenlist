@@ -2,19 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { createApp } from '../server/app.js';
-function setup() {
-  const entries = new Map(); let number = 0;
-  const database = {
-    async list(page, limit) { return { items: [...entries.values()].slice((page - 1) * limit, page * limit), total: entries.size }; },
-    async get(id) { return entries.get(id); },
-    async create(data) { const movie = { ...data, _id: (++number).toString(16).padStart(24, '0'), created_at: new Date().toISOString() }; entries.set(movie._id, movie); return movie; },
-    async update(id, data) { if (!entries.has(id)) return null; const movie = { ...entries.get(id), ...data }; entries.set(id, movie); return movie; },
-    async remove(id) { const movie = entries.get(id); entries.delete(id); return movie; }
-  };
-  return request(createApp(database));
-}
+import { setup } from './helpers.js';
+async function signedIn() { const s = setup(); const result = await s.register(); return s.authenticated(result.body.token); }
 test('create, read, patch, replace, and delete a movie', async () => {
-  const api = setup();
+  const api = await signedIn();
   const created = await api.post('/api/movies').send({ title: ' Arrival ', genre: 'Science fiction', status: 'Planned' }).expect(201);
   const movie = created.body;
   assert.equal(movie.title, 'Arrival'); assert.ok(movie.created_at);
@@ -28,7 +19,7 @@ test('create, read, patch, replace, and delete a movie', async () => {
   await api.get('/api/movies/' + movie._id).expect(404);
 });
 test('reject invalid data, client timestamps, malformed IDs, and invalid pagination', async () => {
-  const api = setup();
+  const api = await signedIn();
   for (const body of [{}, { title: ' ', genre: 'Drama', status: 'Planned' }, { title: 'Film', genre: 'Drama', status: 'Unknown' }, { title: 'Film', genre: 'Drama', status: 'Planned', created_at: 'fake' }]) await api.post('/api/movies').send(body).expect(400);
   await api.get('/api/movies/bad-id').expect(400);
   await api.get('/api/movies?page=0').expect(400);
@@ -36,7 +27,7 @@ test('reject invalid data, client timestamps, malformed IDs, and invalid paginat
   await api.get('/api/missing').expect(404).expect('Content-Type', /json/);
 });
 test('bound collection reads and expose the next page', async () => {
-  const api = setup();
+  const api = await signedIn();
   for (let i = 0; i < 13; i++) await api.post('/api/movies').send({ title: 'Movie ' + i, genre: 'Drama', status: 'Planned' });
   const first = await api.get('/api/movies').expect(200);
   assert.equal(first.body.items.length, 12); assert.equal(first.body.hasMore, true);
@@ -44,7 +35,10 @@ test('bound collection reads and expose the next page', async () => {
   assert.equal(last.body.items.length, 1); assert.equal(last.body.hasMore, false);
 });
 test('return a safe error when the database fails', async () => {
-  const api = request(createApp({ list: async () => { throw new Error('private connection details'); } }));
+  const s = setup(); const result = await s.register();
+  s.db.list = async () => { throw new Error('private connection details'); };
+  const api = s.authenticated(result.body.token);
   const response = await api.get('/api/movies').expect(503);
   assert.ok(!response.text.includes('private'));
 });
+

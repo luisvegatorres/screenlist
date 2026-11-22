@@ -12,9 +12,9 @@ export default function About() {
           Save a title and genre when someone mentions a film. Keep it Planned,
           move it to Watching, and mark it Watched when the credits roll.
         </Text>
-        <Text style={s.heading}>A shared collection for now.</Text>
+        <Text style={s.heading}>A watchlist of your own.</Text>
         <Text style={s.body}>
-          The website and mobile app share one watchlist. Anyone using this
+          Your account connects your private watchlist across the website and mobile app. Anyone using this
           version can add, edit, or remove movies. Keep personal information out
           of movie fields.
         </Text>

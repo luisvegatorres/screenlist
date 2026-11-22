@@ -79,3 +79,22 @@ test("input validation mirrors required fields and limits", () => {
   assert.match(validateInput({ ...movie, genre: "a".repeat(41) }), /genre/);
   assert.match(validateInput({ ...movie, status: "Unknown" }), /status/);
 });
+
+test('native credentials are attached and protected 401 responses expire the session', async () => {
+  let called = 0;
+  const client = createApi('https://example.invalid/api', async (url, options) => {
+    assert.equal(options.headers.Authorization, 'Bearer session-token');
+    assert.equal(options.headers['X-Screenlist-Client'], 'native');
+    return new Response(JSON.stringify({error:'Please sign in'}), {status:401});
+  }, 1000, {getToken:()=> 'session-token', onUnauthorized:()=>called++});
+  await assert.rejects(client.list(), /Please sign in/); assert.equal(called, 1);
+  await assert.rejects(client.authenticate({email:'x@example.invalid',password:'incorrect-password'},false), /Please sign in/); assert.equal(called, 1);
+});
+test('browser auth requests use cookie transport without a bearer token', async () => {
+  const client = createApi('/api', async (url, options) => {
+    assert.equal(url, '/api/auth/register'); assert.equal(options.headers['X-Screenlist-Client'],'web'); assert.equal(options.headers.Authorization, undefined);
+    const body = JSON.parse(options.body); assert.equal(body.name,'Reader');
+    return new Response(JSON.stringify({user:{_id:'1',name:'Reader',email:'r@example.invalid'},expiresAt:'2027-01-01T00:00:00Z'}),{status:201});
+  },1000,{client:'web'});
+  assert.equal((await client.authenticate({name:'Reader',email:'r@example.invalid',password:'example-password'},true)).user.name,'Reader');
+});

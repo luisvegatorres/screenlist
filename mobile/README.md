@@ -23,7 +23,7 @@ For local browser development, run the root Express server first, then set `EXPO
 
 `https://screenlist-three.vercel.app/mobile/`
 
-The root Vercel build exports the React Native web client under `/mobile`, alongside the existing website and API. Web requests use `/api` on that same origin. All clients share the same collection. No authentication or offline synchronization is implemented.
+The root Vercel build exports the React Native web client under `/mobile`, alongside the existing website and API. Web requests use `/api` on that same origin. Each signed-in account has a private collection shared between its web and mobile clients. Registration and sign-in screens precede the protected watchlist, detail, and editor routes. Native bearer tokens stay in memory and expire after one hour; restarting the app requires sign-in. Web sessions use the API’s HttpOnly cookie. Sign-out revokes the session at the API. Offline synchronization is not implemented.
 
 ## Checks
 
