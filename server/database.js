@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import { statuses } from './validation.js';
 mongoose.set('bufferCommands', false);
+// Initialize collections and indexes only after the lazy connection is ready.
+mongoose.set('autoCreate', false);
+mongoose.set('autoIndex', false);
 const schema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, immutable: true },
   title: { type: String, required: true, trim: true, maxlength: 120 },
@@ -11,9 +14,11 @@ schema.index({ owner: 1, created_at: -1, _id: -1 });
 const Movie = mongoose.models.Movie || mongoose.model('Movie', schema);
 let connecting;
 async function connect() {
-  if (mongoose.connection.readyState === 1) return;
   if (!process.env.MONGODB_URI) throw Object.assign(new Error('Database connection is not configured.'), { status: 503 });
-  if (!connecting) connecting = mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000, maxPoolSize: 5 }).catch(error => { connecting = undefined; throw error; });
+  if (!connecting) connecting = (async () => {
+    await mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000, maxPoolSize: 5 });
+    await Promise.all([Movie, User, Session, Attempt].map(model => model.createIndexes()));
+  })().catch(error => { connecting = undefined; throw error; });
   await connecting;
 }
 const userSchema = new mongoose.Schema({
@@ -31,7 +36,7 @@ const Attempt = mongoose.models.AuthAttempt || mongoose.model('AuthAttempt', att
 export const database = {
   async userByEmail(email) { await connect(); return User.findOne({ email }).select('+passwordHash').lean(); },
   async userById(id) { await connect(); return User.findById(id).lean(); },
-  async createUser(data) { await connect(); await User.init(); return (await User.create(data)).toObject(); },
+  async createUser(data) { await connect(); return (await User.create(data)).toObject(); },
   async createSession(data) { await connect(); return Session.create(data); },
   async activeSession(id, user) { await connect(); return Session.exists({ _id: id, user, expiresAt: { $gt: new Date() } }); },
   async deleteSession(id, user) { await connect(); return Session.deleteOne({ _id: id, user }); },

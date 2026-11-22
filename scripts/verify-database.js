@@ -5,8 +5,7 @@ import request from 'supertest';
 import { createApp } from '../server/app.js';
 import { database } from '../server/database.js';
 if (!process.env.MONGODB_URI) throw new Error('Database verification needs MONGODB_URI.');
-// This isolated test app can use an ephemeral signing key; deployment still requires JWT_SECRET.
-process.env.JWT_SECRET ||= randomBytes(48).toString('hex');
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) throw new Error('Database verification needs JWT_SECRET with at least 32 characters.');
 const marker = 'verification-' + randomBytes(12).toString('hex');
 const emails = [marker + '-a@example.invalid', marker + '-b@example.invalid'];
 const password = randomBytes(24).toString('hex');
@@ -19,6 +18,7 @@ try {
     const result = await api.post('/api/auth/register').set('X-Screenlist-Client','native').send({name:marker,email,password}).expect(201);
     tokens.push(result.body.token); assert.equal(result.body.user.passwordHash, undefined);
   }
+  await api.post('/api/auth/register').set('X-Screenlist-Client','native').send({name:marker,email:emails[0],password}).expect(409);
   const [a,b] = tokens;
   const item = (await authed('post','/api/movies',a).send({title:marker,genre:'Test',status:'Planned'}).expect(201)).body;
   assert.equal((await authed('get','/api/movies',a).expect(200)).body.total, 1);
