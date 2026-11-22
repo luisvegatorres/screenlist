@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "express": "5.1.0",
-    "mongoose": "8.19.1",
+    "mongoose": "8.24.7",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "passport": "0.7.0",
