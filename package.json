@@ -11,13 +11,18 @@
     "start": "node --env-file-if-exists=.env server/start.js",
     "test": "node --test test/*.test.js",
     "check": "node --check server/app.js && node --check server/database.js",
-    "test:mobile": "npm --prefix mobile test"
+    "test:mobile": "npm --prefix mobile test",
+    "verify:database": "node --env-file-if-exists=.env scripts/verify-database.js"
   },
   "dependencies": {
     "express": "5.1.0",
-    "mongoose": "8.19.1",
+    "mongoose": "8.24.7",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "passport": "0.7.0",
+    "passport-local": "1.0.0",
+    "passport-jwt": "4.0.1",
+    "jsonwebtoken": "9.0.2"
   },
   "devDependencies": {
     "esbuild": "0.25.12",

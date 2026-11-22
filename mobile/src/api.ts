@@ -1,3 +1,4 @@
+export type User = { _id: string; name: string; email: string };
 export type Status = "Planned" | "Watching" | "Watched";
 export type MovieInput = { title: string; genre: string; status: Status };
 export type Movie = MovieInput & {
@@ -29,6 +30,7 @@ export function createApi(
   baseUrl: string,
   fetcher: typeof fetch = fetch,
   timeoutMs = 15000,
+  auth: { getToken?: () => string | null; client?: 'web' | 'native'; onUnauthorized?: () => void } = {},
 ) {
   async function request<T>(
     path: string,
@@ -46,6 +48,8 @@ export function createApi(
         signal: controller.signal,
         headers: {
           Accept: "application/json",
+          'X-Screenlist-Client': auth.client || 'native',
+          ...(auth.getToken?.() ? { Authorization: 'Bearer ' + auth.getToken() } : {}),
           ...(options.body ? { "Content-Type": "application/json" } : {}),
           ...options.headers,
         },
@@ -56,10 +60,12 @@ export function createApi(
           "The server returned an unexpected response. Please try again.",
         );
       });
-      if (!response.ok)
-        throw new Error(
+      if (!response.ok) {
+        if (response.status === 401 && !['/auth/login', '/auth/register', '/auth/me'].includes(path)) auth.onUnauthorized?.();
+        throw Object.assign(new Error(
           data.error || "The request could not be completed. Please try again.",
-        );
+        ), { status: response.status });
+      }
       return data as T;
     } catch (error) {
       if (external?.aborted) throw error;
@@ -78,6 +84,9 @@ export function createApi(
     }
   }
   return {
+    me: () => request<{ user: User; expiresAt: string }>('/auth/me'),
+    authenticate: (values: { name?: string; email: string; password: string }, register: boolean) => request<{ user: User; token?: string; expiresAt: string }>(register ? '/auth/register' : '/auth/login', { method: 'POST', body: JSON.stringify(values) }),
+    logout: () => request<null>('/auth/logout', { method: 'POST' }),
     list: (page = 1, signal?: AbortSignal) =>
       request<MoviePage>("/movies?page=" + page, { signal }),
     get: (id: string, signal?: AbortSignal) =>

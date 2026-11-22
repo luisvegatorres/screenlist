@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { request } from './api.js';
 import './styles.css';
+import { AuthProvider, ProtectedWatchlist } from './auth.jsx';
 
 const statuses = ['Planned', 'Watching', 'Watched'];
 const blank = { title: '', genre: '', status: 'Planned' };
@@ -70,7 +71,8 @@ function Watchlist() {
 }
 
 function About() {
-  return <article className="about"><span className="eyebrow">A LITTLE LESS SCROLLING</span><h1>Good recommendations<br/><em>deserve a place.</em></h1><p className="intro">Screenlist is a small home for the films you want to watch—and the ones you finally made time for.</p><div className="about-grid"><section><span className="step">01</span><h2>Keep the recommendation.</h2><p>Add a title and genre when someone mentions a film. Choose Planned to save it for another night.</p></section><section><span className="step">02</span><h2>Make it your next watch.</h2><p>Edit a movie to change its details or move it to Watching. Mark it Watched when the credits roll.</p></section><section><span className="step">03</span><h2>Leave room for something new.</h2><p>Remove films you no longer want to keep. You’ll get a chance to confirm before a movie is deleted.</p></section></div><aside className="about-note"><h2>A shared collection for now.</h2><p>This version has one shared watchlist. Anyone using the site can add, edit, or remove entries, so keep personal information out of movie fields.</p></aside><a className="primary" href="/">Open the watchlist ↗</a></article>;
+  return <article className="about"><span className="eyebrow">A LITTLE LESS SCROLLING</span><h1>Good recommendations<br/><em>deserve a place.</em></h1><p className="intro">Screenlist is a small home for the films you want to watch—and the ones you finally made time for.</p><div className="about-grid"><section><span className="step">01</span><h2>Keep the recommendation.</h2><p>Add a title and genre when someone mentions a film. Choose Planned to save it for another night.</p></section><section><span className="step">02</span><h2>Make it your next watch.</h2><p>Edit a movie to change its details or move it to Watching. Mark it Watched when the credits roll.</p></section><section><span className="step">03</span><h2>Leave room for something new.</h2><p>Remove films you no longer want to keep. You’ll get a chance to confirm before a movie is deleted.</p></section></div><aside className="about-note"><h2>A watchlist of your own.</h2><p>Sign in to keep a private list. Your account connects your movies across the website and mobile app. Only you can view, edit, or remove your entries.</p></aside><a className="primary" href="/">Open the watchlist ↗</a></article>;
 }
 const about = window.location.pathname.replace(/\/$/, '') === '/about';
-createRoot(document.getElementById('root')).render(<><a className="skip" href="#main">Skip to content</a><Header about={about}/><main id="main">{about ? <About/> : <Watchlist/>}</main><footer><a className="brand" href="/">screenlist.</a><span>A LITTLE LIST. A GOOD MOVIE NIGHT.</span><a href="/about">About this project ↗</a></footer></>);
+createRoot(document.getElementById('root')).render(<AuthProvider><><a className="skip" href="#main">Skip to content</a><Header about={about}/><main id="main">{about ? <About/> : <ProtectedWatchlist><Watchlist/></ProtectedWatchlist>}</main><footer><a className="brand" href="/">screenlist.</a><span>A LITTLE LIST. A GOOD MOVIE NIGHT.</span><a href="/about">About this project ↗</a></footer></></AuthProvider>);
+
